@@ -33,7 +33,7 @@ jobs:
       - name: Extract Subscription Link # 步骤名称：提取订阅链接
         id: extract_link # 给这个步骤设置 ID，方便后续步骤引用输出
         run: |
-          subscription_link=$(cat subscription_output.txt) # 从文件中读取订阅链接
+          subscription_link=$(tail -n 1 subscription_output.txt) # 从文件中读取 *最后一行* (订阅链接)
           echo "subscription_link=$subscription_link" >> "$GITHUB_OUTPUT" # 将订阅链接设置为步骤的输出
 
       - name: Update Subscription Link File # 步骤名称：更新订阅链接文件
