@@ -1,8 +1,5 @@
-- name: Update Subscription Link File # 步骤名称：更新订阅链接文件
-     uses: actions/github-script@v6 # 使用 actions/github-script@v6 action，用于执行 JavaScript 脚本与 GitHub API 交互
-     with:
-       script: |
-         console.log('这是一个简化的测试脚本。如果日志中看到这句话，说明 YAML 文件解析正常。');
+name: Update Subscription Link  # 工作流的名称，会在 Actions 列表中显示
+
 on:
   schedule:
     - cron: '0 0 * * *' # UTC 时间每天 00:00 运行 (北京时间每天 08:00)
