@@ -1,4 +1,4 @@
-name: Update Subscription Link  # 工作流的名称，会在 Actions 列表中显示
+name: Update Subscription Link
 
 on:
   schedule:
