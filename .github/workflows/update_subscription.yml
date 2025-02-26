@@ -3,7 +3,7 @@ name: Update Subscription Link  # 工作流的名称，会在 Actions 列表中�
 on:
   schedule:
     - cron: '0 0 * * *' # UTC 时间每天 00:00 运行 (北京时间每天 08:00)
-  workflow_dispatch: # 允许手动触发工作流
+  workflow_dispatch:  # 允许手动触发工作流
 
 # 添加 permissions 块，授予 workflow contents: write 权限
 permissions:
@@ -11,44 +11,44 @@ permissions:
 
 jobs:
   generate_and_update:
-    runs-on: ubuntu-latest # 运行在 Ubuntu 最新版本虚拟机上
+    runs-on: ubuntu-latest  # 运行在 Ubuntu 最新版本虚拟机上
 
     steps:
-      - name: Checkout repository # 步骤名称：检出代码
-        uses: actions/checkout@v3 # 使用 actions/checkout@v3 action，用于检出当前仓库的代码
+      - name: Checkout 代码仓库  # 步骤名称：检出代码
+        uses: actions/checkout@v3  # 使用 actions/checkout@v3 action，用于检出当前仓库的代码
 
-      - name: Set up Python # 步骤名称：设置 Python 环境
-        uses: actions/setup-python@v4 # 使用 actions/setup-python@v4 action，用于设置 Python 环境
+      - name: 设置 Python 环境  # 步骤名称：设置 Python 环境
+        uses: actions/setup-python@v4  # 使用 actions/setup-python@v4 action，用于设置 Python 环境
         with:
-          python-version: '3.x' # 使用 Python 3.x 版本
+          python-version: '3.x'  # 使用 Python 3.x 版本
 
-      - name: Install dependencies # 步骤名称：安装依赖
+      - name: 安装 Python 依赖库  # 步骤名称：安装依赖
         run: |
-          python -m pip install --upgrade pip # 升级 pip
-          pip install requests pyaes pycryptodome # 安装脚本所需的库 (如果需要其他库，请添加)
+          python -m pip install --upgrade pip  # 升级 pip
+          pip install requests pyaes pycryptodome  # 安装脚本所需的库 (如果需要其他库，请添加)
 
-      - name: Run Python script # 步骤名称：运行 Python 脚本
+      - name: 运行 Python 脚本  # 步骤名称：运行 Python 脚本
         run: |
-          echo "::group::Python script output" #  日志分组开始标记
-          python generate_subscription.py > subscription_output.txt # 运行 Python 脚本并将输出重定向到文件
-          cat subscription_output.txt #  为了在日志中显示 subscription_output.txt 文件的内容 (调试用)
-          echo "::endgroup::" # 日志分组结束标记
+          echo "::group::Python 脚本输出内容"  #  日志分组开始标记
+          python generate_subscription.py > subscription_output.txt  # 运行 Python 脚本并将输出重定向到文件
+          cat subscription_output.txt  #  为了在日志中显示 subscription_output.txt 文件的内容 (调试用)
+          echo "::endgroup::"  # 日志分组结束标记
 
-      - name: Extract Subscription Link # 步骤名称：提取订阅链接
-        id: extract_link # 给这个步骤设置 ID，方便后续步骤引用输出
+      - name: 提取订阅链接  # 步骤名称：提取订阅链接
+        id: extract_link  # 给这个步骤设置 ID，方便后续步骤引用输出
         run: |
-          subscription_link=$(tail -n 1 subscription_output.txt) # 从文件中读取 *最后一行* (订阅链接)
-          echo "subscription_link=$subscription_link" >> "$GITHUB_OUTPUT" # 将订阅链接设置为步骤的输出
+          subscription_link=$(tail -n 1 subscription_output.txt)  # 从文件中读取 *最后一行* (订阅链接)
+          echo "subscription_link=$subscription_link" >> "$GITHUB_OUTPUT"  # 将订阅链接设置为步骤的输出
 
-      - name: Update Subscription Link File # 步骤名称：更新订阅链接文件
-        uses: actions/github-script@v6 # 使用 actions/github-script@v6 action，用于执行 JavaScript 脚本与 GitHub API 交互
+      - name: 更新订阅链接文件  # 步骤名称：更新订阅链接文件
+        uses: actions/github-script@v6  # 使用 actions/github-script@v6 action，用于执行 JavaScript 脚本与 GitHub API 交互
         with:
           script: |
-            const subscriptionLink = "${{ steps.extract_link.outputs.subscription_link }}"; // 从上一步骤的输出中获取订阅链接
-            const contentBase64 = Buffer.from(subscriptionLink).toString('base64'); // 将订阅链接内容进行 Base64 编码
-            const path = 'subscription_link.txt'; // 文件路径
-            const owner = context.repo.owner; // 仓库所有者
-            const repo = context.repo.repo; // 仓库名
+            const subscriptionLink = "${{ steps.extract_link.outputs.subscription_link }}";  # 从上一步骤的输出中获取订阅链接
+            const contentBase64 = Buffer.from(subscriptionLink).toString('base64');  # 将订阅链接内容进行 Base64 编码
+            const path = 'subscription_link.txt';  # 文件路径
+            const owner = context.repo.owner;  # 仓库所有者
+            const repo = context.repo.repo;  # 仓库名
 
             try {
               // 尝试获取文件，如果文件已存在
@@ -63,11 +63,11 @@ jobs:
                 owner: owner,
                 repo: repo,
                 path: path,
-                message: 'Update subscription link daily', // 提交信息
-                content: contentBase64, // Base64 编码后的新内容
-                sha: getFileResponse.data.sha, //  SHA 值，用于标识文件版本，确保更新的是最新版本
+                message: '每日更新订阅链接',  # 提交信息
+                content: contentBase64,  # Base64 编码后的新内容
+                sha: getFileResponse.data.sha,  #  SHA 值，用于标识文件版本，确保更新的是最新版本
               });
-              console.log('Subscription link file updated successfully!');
+              console.log('订阅链接文件更新成功!');
             } catch (error) {
               // 如果文件不存在 (例如状态码 404)
               if (error.status === 404) {
@@ -76,12 +76,12 @@ jobs:
                   owner: owner,
                   repo: repo,
                   path: path,
-                  message: 'Create subscription link file', // 提交信息
-                  content: contentBase64, // Base64 编码后的内容
+                  message: '创建订阅链接文件',  # 提交信息
+                  content: contentBase64,  # Base64 编码后的内容
                 });
-                console.log('Subscription link file created successfully!');
+                console.log('订阅链接文件创建成功!');
               } else {
-                console.error('Error updating/creating subscription link file:', error);
-                throw error; // 抛出错误，让工作流失败
+                console.error('更新/创建订阅链接文件出错:', error);
+                throw error;  # 抛出错误，让工作流失败
               }
             }
