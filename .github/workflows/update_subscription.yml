@@ -38,13 +38,12 @@ jobs:
         id: extract_link  # 给这个步骤设置 ID，方便后续步骤引用输出
         run: |
           subscription_link=$(tail -n 1 subscription_output.txt)  # 从文件中读取 *最后一行* (订阅链接)
-          echo "subscription_link=$subscription_link" >> "$GITHUB_OUTPUT"  # 将订阅链接设置为步骤的输出
-
-      - name: Update Subscription Link File  # 步骤名称：更新订阅链接文件
-        uses: actions/github-script@v6  # 使用 actions/github-script@v6 action，用于执行 JavaScript 脚本与 GitHub API 交互
-        with:
-          script: |
-            const subscriptionLink = "${{ steps.extract_link.outputs.subscription_link }}";  # 从上一步骤的输出中获取订阅链接
+          echo "subscription_link=$subscription_link" >> "<span class="math-inline">GITHUB\_OUTPUT"  \# 将订阅链接设置为步骤的输出
+\- name\: Update Subscription Link File  \# 步骤名称：更新订阅链接文件
+uses\: actions/github\-script@v6  \# 使用 actions/github\-script@v6 action，用于执行 JavaScript 脚本与 GitHub API 交互
+with\:
+script\: \|
+const subscriptionLink \= "</span>{{ steps.extract_link.outputs.subscription_link }}";  # 从上一步骤的输出中获取订阅链接
             const contentBase64 = Buffer.from(subscriptionLink).toString('base64');  # 将订阅链接内容进行 Base64 编码
             const path = 'subscription_link.txt';  # 文件路径
             const owner = context.repo.owner;  # 仓库所有者
