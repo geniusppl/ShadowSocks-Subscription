@@ -38,45 +38,44 @@ jobs:
         id: extract_link  # 给这个步骤设置 ID，方便后续步骤引用输出
         run: |
           subscription_link=$(tail -n 1 subscription_output.txt)  # 从文件中读取 *最后一行* (订阅链接)
-          echo "subscription_link=$subscription_link" >> "<span class="math-inline">GITHUB\_OUTPUT"  \# 将订阅链接设置为步骤的输出
-\- name\: Update Subscription Link File  \# 步骤名称：更新订阅链接文件
-uses\: actions/github\-script@v6  \# 使用 actions/github\-script@v6 action，用于执行 JavaScript 脚本与 GitHub API 交互
-with\:
-script: |
-           const subscriptionLink = process.env.SUBSCRIPTION_LINK; // 从环境变量中获取 subscription_link
-           const contentBase64 = Buffer.from(subscriptionLink).toString('base64');
-           const path = 'subscription_link.txt';
-           const owner = context.repo.owner;
-           const repo = context.repo.repo;
+          echo "subscription_link=$subscription_link" >> "$GITHUB_OUTPUT"  # 将订阅链接设置为步骤的输出
+          echo "SUBSCRIPTION_LINK=$subscription_link" >> "$GITHUB_ENV"  #  将订阅链接设置为环境变量
 
-           try {
-             const getFileResponse = await github.rest.repos.getContent({
-               owner: owner,
-               repo: repo,
-               path: path,
-             });
+      - name: Update Subscription Link File  # 步骤名称：更新订阅链接文件
+        uses: actions/github-script@v6  # 使用 actions/github-script@v6 action，用于执行 JavaScript 脚本与 GitHub API 交互
+        with:
+          script: |
+            const subscriptionLink = process.env.SUBSCRIPTION_LINK;  # 从环境变量中获取 subscription_link
+            const contentBase64 = Buffer.from(subscriptionLink).toString('base64');  # 将订阅链接内容进行 Base64 编码
+            const path = 'subscription_link.txt';  # 文件路径
+            const owner = context.repo.owner;  # 仓库所有者
+            const repo = context.repo.repo;  # 仓库名
 
-             await github.rest.repos.createOrUpdateFileContents({
-               owner: owner,
-               repo: repo,
-               path: path,
-               message: '每日更新订阅链接',
-               content: contentBase64,
-               sha: getFileResponse.data.sha,
-             });
-             console.log('订阅链接文件更新成功!');
-           } catch (error) {
-             if (error.status === 404) {
-               await github.rest.repos.createOrUpdateFileContents({
-                 owner: owner,
-                 repo: repo,
-                 path: path,
-                 message: '创建订阅链接文件',
-                 content: contentBase64,
-               });
-               console.log('订阅链接文件创建成功!');
-             } else {
-               console.error('更新/创建订阅链接文件出错:', error);
-               throw error;
-             }
-           }
+            try {
+              // 尝试获取文件，如果文件已存在
+              const getFileResponse = await github.rest.repos.getContent({
+                owner: owner,
+                repo: repo,
+                path: path,
+              });
+
+              // 更新文件内容
+              await github.rest.repos.createOrUpdateFileContents({
+                owner: owner,
+                repo: repo,
+                path: path,
+                message: '每日更新订阅链接',  # 提交信息
+                content: contentBase64,  # Base64 编码后的新内容
+                sha: getFileResponse.data.sha,  #  SHA 值，用于标识文件版本，确保更新的是最新版本
+              });
+              console.log('订阅链接文件更新成功!');
+            } catch (error) {
+              // 如果文件不存在 (例如状态码 404)
+              if (error.status === 404) {
+                // 创建文件
+                await github.rest.repos.createOrUpdateFileContents({
+                  owner: owner,
+                  repo: repo,
+                  path: path,
+                  message: '创建订阅链接文件',  # 提交信息
+                  content: contentBase64,  # Base64 编码后的内容
