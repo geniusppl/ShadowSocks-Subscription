@@ -28,7 +28,11 @@ jobs:
           pip install requests pyaes pycryptodome # 安装脚本所需的库 (如果需要其他库，请添加)
 
       - name: Run Python script # 步骤名称：运行 Python 脚本
-        run: python generate_subscription.py > subscription_output.txt # 运行 Python 脚本并将输出重定向到 subscription_output.txt 文件
+        run: |
+          echo "::group::Python script output" #  日志分组开始标记
+          python generate_subscription.py > subscription_output.txt # 运行 Python 脚本并将输出重定向到文件
+          cat subscription_output.txt #  为了在日志中显示 subscription_output.txt 文件的内容 (调试用)
+          echo "::endgroup::" # 日志分组结束标记
 
       - name: Extract Subscription Link # 步骤名称：提取订阅链接
         id: extract_link # 给这个步骤设置 ID，方便后续步骤引用输出
