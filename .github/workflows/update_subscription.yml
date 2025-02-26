@@ -7,7 +7,7 @@ on:
 
 jobs:
   generate_and_update:
-    runs-on: ubuntu-latest # 运行在 Ubuntu 最新版本虚拟机上
+    runs-on: ubuntu-latest # 运行在 Ubuntu 最新版本虚拟机
 
     steps:
       - name: Checkout repository # 步骤名称：检出代码
