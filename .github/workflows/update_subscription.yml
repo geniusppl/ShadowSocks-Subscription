@@ -29,7 +29,7 @@ jobs:
 
       - name: 运行 Python 脚本  # 步骤名称：运行 Python 脚本
         run: |
-          echo "::group::Python 脚本输出内容"  #  日志分组开始标记
+          echo "::group::Python script output"  #  日志分组开始标记
           python generate_subscription.py > subscription_output.txt  # 运行 Python 脚本并将输出重定向到文件
           cat subscription_output.txt  #  为了在日志中显示 subscription_output.txt 文件的内容 (调试用)
           echo "::endgroup::"  # 日志分组结束标记
