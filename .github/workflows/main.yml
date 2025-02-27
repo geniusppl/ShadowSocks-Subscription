@@ -1,0 +1,48 @@
+name: Generate Subscription
+
+on:
+  workflow_dispatch:  # 允许手动触发
+  schedule:
+    - cron: '0 12 * * *'  # 每天 UTC 时间 12:00 自动运行
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyyaml requests pyaes
+
+    - name: Generate config
+      run: |
+        echo "::group::生成过程日志"
+        python generate_subscription.py > clash_config.yaml
+        echo "::endgroup::"
+        
+        echo "::group::配置文件预览"
+        head -n 20 clash_config.yaml
+        echo "::endgroup::"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: clash-config
+        path: clash_config.yaml
+
+    - name: Commit config
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add clash_config.yaml
+        git commit -m "Auto-update config" || echo "No changes to commit"
+        git push
