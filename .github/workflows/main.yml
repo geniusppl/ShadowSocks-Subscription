@@ -9,19 +9,21 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 读取仓库内容权限
-      actions: read  # 读取动作权限
-      pages: write  # 写入 Pages 权限
-      id-token: write  # 用于身份验证
+      contents: write  # 必须设置为 write 权限
+      actions: read
+      pages: write
+      id-token: write
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 获取完整提交历史
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.13'  # 指定 Python 版本
+        python-version: '3.13'
 
     - name: Install dependencies
       run: |
@@ -39,19 +41,19 @@ jobs:
         echo "::endgroup::"
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4  # 必须使用 v4 版本
       with:
         name: clash-config
         path: clash_config.yaml
 
-    - name: Commit and push changes
+    - name: Configure Git
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
+
+    - name: Commit and push
+      run: |
         git add clash_config.yaml
         git commit -m "Auto-update config at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-        git push
-
-    - name: Post success message
-      run: |
-        echo "Subscription config updated successfully!"
+        # 使用 GITHUB_TOKEN 认证推送
+        git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:${{ github.ref }}
