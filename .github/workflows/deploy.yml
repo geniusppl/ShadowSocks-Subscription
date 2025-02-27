@@ -1,7 +1,6 @@
 name: Deploy to GitHub Pages
 
 on:
-  # 当 generate-subscription 工作流完成后触发
   workflow_run:
     workflows: ["Generate Subscription"]
     types: [completed]
@@ -9,28 +8,31 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    needs: generate  # 明确指定依赖关系
     permissions:
-      pages: write  # 启用 Pages 部署权限
+      pages: write
       id-token: write
     
     steps:
-    - name: Checkout repository
+    - name: Checkout repo
       uses: actions/checkout@v4
 
-    - name: Download artifact
-      uses: actions/download-artifact@v4
+    - name: List artifacts
+      uses: actions/list-artifacts@v3
+      id: list-artifacts
       with:
-        name: clash-config  # 必须与前一个工作流的 artifact 名称一致
+        workflow: Generate Subscription  # 上传artifacts的工作流名称
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4  # 升级到最新版本
+      with:
+        name: clash-config
         path: ./public
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v3
-
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v2  # 独立动作，无需升级
       with:
         path: ./public
 
     - name: Deploy to GitHub Pages
-      id: deployment
       uses: actions/deploy-pages@v2
