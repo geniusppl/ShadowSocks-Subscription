@@ -8,6 +8,11 @@ on:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # 读取仓库内容权限
+      actions: read  # 读取动作权限
+      pages: write  # 写入 Pages 权限
+      id-token: write  # 用于身份验证
     
     steps:
     - name: Checkout code
@@ -16,7 +21,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: '3.13'  # 指定 Python 版本
 
     - name: Install dependencies
       run: |
@@ -39,10 +44,14 @@ jobs:
         name: clash-config
         path: clash_config.yaml
 
-    - name: Commit config
+    - name: Commit and push changes
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
         git add clash_config.yaml
-        git commit -m "Auto-update config" || echo "No changes to commit"
+        git commit -m "Auto-update config at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
         git push
+
+    - name: Post success message
+      run: |
+        echo "Subscription config updated successfully!"
