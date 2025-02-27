@@ -9,7 +9,7 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 必须设置为 write 权限
+      contents: write  # 授予写入仓库的权限
       actions: read
       pages: write
       id-token: write
@@ -17,8 +17,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # 获取完整提交历史
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -41,10 +39,11 @@ jobs:
         echo "::endgroup::"
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4  # 必须使用 v4 版本
+      uses: actions/upload-artifact@v4  # 升级到最新版本
       with:
         name: clash-config
         path: clash_config.yaml
+        retention-days: 365  # 设置较长的保留时间
 
     - name: Configure Git
       run: |
