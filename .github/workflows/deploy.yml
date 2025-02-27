@@ -6,9 +6,8 @@ on:
     types: [completed]
 
 jobs:
-  deploy:
+  deploy:  # 唯一作业，无需声明依赖关系
     runs-on: ubuntu-latest
-    needs: generate  # 明确指定依赖关系
     permissions:
       pages: write
       id-token: write
@@ -17,20 +16,14 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
-    - name: List artifacts
-      uses: actions/list-artifacts@v3
-      id: list-artifacts
-      with:
-        workflow: Generate Subscription  # 上传artifacts的工作流名称
-
     - name: Download artifact
-      uses: actions/download-artifact@v4  # 升级到最新版本
+      uses: actions/download-artifact@v4
       with:
         name: clash-config
         path: ./public
 
     - name: Upload Pages artifact
-      uses: actions/upload-pages-artifact@v2  # 独立动作，无需升级
+      uses: actions/upload-pages-artifact@v2
       with:
         path: ./public
 
