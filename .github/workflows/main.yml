@@ -9,7 +9,7 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     permissions:
-      contents: read  # 读取仓库内容权限
+      contents: write  # 读取仓库内容权限
       actions: read  # 读取动作权限
       pages: write  # 写入 Pages 权限
       id-token: write  # 用于身份验证
