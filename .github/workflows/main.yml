@@ -39,7 +39,7 @@ jobs:
         echo "::endgroup::"
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: clash-config
         path: clash_config.yaml
